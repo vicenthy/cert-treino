@@ -1,9 +1,9 @@
 // Service worker: cache do app inteiro para funcionar offline.
 // Ao mudar qualquer arquivo, incremente VERSION para os aparelhos baixarem a nova versão.
-const VERSION = "dva-treino-v3";
+const VERSION = "dva-treino-v4";
 const FILES = [
   "./", "index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png",
-  "data/exam.js", "data/q-d1.js", "data/q-d2.js", "data/q-d3.js", "data/q-d4.js", "data/q-lote2.js", "data/compare.js", "data/gen.js"
+  "data/exam.js", "data/q-d1.js", "data/q-d2.js", "data/q-d3.js", "data/q-d4.js", "data/q-lote2.js", "data/q-lote3.js", "data/compare.js", "data/gen.js"
 ];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

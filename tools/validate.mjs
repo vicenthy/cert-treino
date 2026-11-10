@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 const ctx = { window: {}, console }; ctx.window = ctx; vm.createContext(ctx);
-for (const f of ["exam", "q-d1", "q-d2", "q-d3", "q-d4", "q-lote2", "compare", "gen"])
+for (const f of ["exam", "q-d1", "q-d2", "q-d3", "q-d4", "q-lote2", "q-lote3", "compare", "gen"])
   vm.runInContext(readFileSync(new URL(`../data/${f}.js`, import.meta.url), "utf8"), ctx, { filename: f });
 const { EXAM, QB, CMP, GEN } = ctx;
 const errs = [];

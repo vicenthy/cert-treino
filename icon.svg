@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="0" fill="#0f1720"/>
+  <rect x="96" y="96" width="320" height="320" rx="64" fill="#f59e2b"/>
+  <text x="256" y="300" font-family="DejaVu Sans, Arial, sans-serif" font-size="112" font-weight="700" text-anchor="middle" fill="#1b1204">DVA</text>
+  <path d="M176 340 h160" stroke="#1b1204" stroke-width="14" stroke-linecap="round"/>
+</svg>

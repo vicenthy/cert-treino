@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>DVA Treino</title>
+  <meta name="description" content="Treino mobile para a certificação AWS Certified Developer - Associate (DVA-C02).">
+  <meta name="theme-color" content="#0f1720" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DVA Treino">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/" class="brand"><span class="logo">DVA</span> Treino</a>
+    <a href="#/ajustes" class="iconbtn" aria-label="Ajustes">⚙︎</a>
+  </header>
+  <main id="app" tabindex="-1"></main>
+  <nav class="tabbar" aria-label="Navegação">
+    <a href="#/" data-tab="home"><span>⌂</span>Início</a>
+    <a href="#/praticar" data-tab="praticar"><span>✎</span>Praticar</a>
+    <a href="#/simulado" data-tab="simulado"><span>⏱</span>Simulado</a>
+    <a href="#/comparar" data-tab="comparar"><span>⇄</span>Comparar</a>
+  </nav>
+  <script src="data/exam.js"></script>
+  <script src="data/q-d1.js"></script>
+  <script src="data/q-d2.js"></script>
+  <script src="data/q-d3.js"></script>
+  <script src="data/q-d4.js"></script>
+  <script src="data/compare.js"></script>
+  <script src="data/gen.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -53,7 +53,7 @@ QB.push(
   trap: "Na Lambda basta ativar o tracing; no EC2 é preciso o daemon/agente e a role.",
   tip: "Sem traces no EC2/ECS → daemon (ou agente) rodando + permissão IAM. Atualização: desde 25/02/2026 os SDKs e o daemon do X-Ray estão em modo de manutenção, e a AWS recomenda migrar para OpenTelemetry (ADOT / agente do CloudWatch).",
   ref: "https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html",
-  ev: "The AWS X-Ray daemon is a software application that listens for traffic on UDP port 2000, gathers raw segment data, and relays it to the AWS X-Ray API. [...] On February 25th, 2026, the AWS X-Ray SDKs/Daemon will enter maintenance mode.",
+  ev: "The AWS X-Ray daemon is a software application that listens for traffic on UDP port 2000, gathers raw segment data, and relays it to the AWS X-Ray API. [...] On February 25th, 2026, the AWS X-Ray SDKs/Daemon will enter maintenance mode, where AWS will limit X-Ray SDK and Daemon releases to address security issues only.",
   evu: "https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon.html"
 },
 {

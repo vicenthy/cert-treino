@@ -109,7 +109,7 @@
       concept: "Limite de 4 KB da API Encrypt e envelope encryption", trap: "Usar envelope encryption para dados minúsculos ou Encrypt direto para arquivos grandes.",
       tip: "Até 4 KB → Encrypt. Mais que isso → GenerateDataKey (envelope).",
       ref: "https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html",
-      ev: "Encrypts plaintext of up to 4,096 bytes using a KMS key. [...] Envelope encryption is the practice of encrypting plaintext data with a data key, and then encrypting the data key under another key.",
+      ev: "Encrypts plaintext of up to 4,096 bytes using a KMS key.",
       evu: "https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html"
     }, items);
   };

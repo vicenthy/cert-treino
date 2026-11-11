@@ -1,9 +1,13 @@
-/* DVA Treino — PWA de estudo para AWS DVA-C02.
+/* Cert Treino — motor genérico de estudo para certificações.
+   Cada certificação (certs/<id>/) define window.EXAM, QB, CMP e, opcionalmente, GEN.
    Metodologia adaptada do Kiro Study Buddy (aws-samples/sample-kiro-study-buddy, licença MIT). */
 (() => {
   "use strict";
 
-  const E = window.EXAM, QB = window.QB, CMP = window.CMP;
+  const E = window.EXAM, QB = window.QB, CMP = window.CMP || [], GEN = window.GEN || null;
+  const DOCS = (E.docs && E.docs.allow || []).map(r => new RegExp(r));   // domínios de documentação oficial aceitos
+  const isDoc = u => typeof u === "string" && DOCS.some(r => r.test(u));
+  const gen = n => GEN ? GEN.many(n) : [];
   const BYID = Object.fromEntries(QB.map(q => [q.id, q]));
   const BUDGET_S = Math.round((E.minutes * 60) / E.questions); // 120 s por questão
   const PASS_PCT = (E.passing - 100) / 900 * 100;              // 68,9%
@@ -13,7 +17,7 @@
   const $app = document.getElementById("app");
 
   /* ---------- armazenamento ---------- */
-  const KEY = "dva-treino-v1";
+  const KEY = E.storageKey || `cert-treino-${E.id}-v1`;
   const blank = () => ({ q: {}, sims: [], days: {}, conf: {}, packs: [] });
   let S = blank();
   try { S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (_) {}
@@ -121,7 +125,8 @@
 
   function qHeader(q, label) {
     return `<div class="qhead"><span>${label}</span><span class="tag">${esc(dname(q.d))}</span></div>
-      <div class="qhead"><span>Task ${q.t} · ${esc(E.tasks[q.t] || "")}</span><span>${esc(q.lvl)}</span></div>
+      <div class="qhead"><span>${E.tasks && E.tasks[q.t] ? `Task ${q.t} · ${esc(E.tasks[q.t])}` : q.sc ? `Cenário: ${esc(q.sc)}` : ""}</span><span>${esc(q.lvl)}</span></div>
+      ${q.sc && E.tasks && E.tasks[q.t] ? `<div class="qhead"><span>Cenário: ${esc(q.sc)}</span></div>` : ""}
       ${need(q) > 1 ? `<span class="multi">Selecione ${need(q) === 2 ? "DUAS" : "TRÊS"}</span>` : ""}
       <p class="qtext">${esc(q.q)}</p>`;
   }
@@ -209,7 +214,7 @@
       ${last.length ? `<h2>Últimos simulados</h2><div class="card">${last.map(s => `
         <div class="dom"><div class="top"><span>${new Date(s.date).toLocaleDateString("pt-BR")} · ${s.n} questões</span>
         <b>${s.scaled} <span class="pill ${s.pass ? "ok" : "bad"}">${s.pass ? "PASS" : "FAIL"}</span></b></div></div>`).join("")}</div>` : ""}
-      <p class="foot">${E.name} (${E.code}) · ${E.questions} questões · ${E.minutes} min · nota mínima ${E.passing}</p>`;
+      <p class="foot">${E.name} (${E.code}) · ${E.questions} questões · ${E.minutes} min · nota mínima ${E.passing}${E.unofficialBlueprint ? " · domínios não oficiais" : ""}<br><a href="${window.ROOT || "./"}">⇦ Trocar de certificação</a></p>`;
   };
 
   /* Praticar (hub) */
@@ -222,7 +227,7 @@
         <a href="#/treino"><span class="ic">⚡</span><span><b>Treino rápido</b><small>10 questões com explicação na hora</small></span></a>
         <a href="#/revisao"><span class="ic">↻</span><span><b>Revisão espaçada</b><small>As que você errou voltam no momento certo</small></span>${dq ? `<span class="badge">${dq}</span>` : ""}</a>
         <a href="#/destrinchar"><span class="ic">🔬</span><span><b>Destrinchar questão</b><small>Método em 4 passos: palavras-chave → eliminar → escolher → refletir</small></span></a>
-        <a href="#/treino/gerado"><span class="ic">🎲</span><span><b>Variações geradas</b><small>Cálculos e flashes com números e cenários novos a cada vez</small></span></a>
+        ${GEN ? `<a href="#/treino/gerado"><span class="ic">🎲</span><span><b>Variações geradas</b><small>Cálculos e flashes com números e cenários novos a cada vez</small></span></a>` : ""}
         <a href="#/gerar"><span class="ic">🤖</span><span><b>Mais questões com IA</b><small>Gere pacotes novos de graça no app do Claude e importe aqui</small></span>${S.packs.length ? `<span class="badge">${S.packs.length}</span>` : ""}</a>
         <a href="#/treino/erradas"><span class="ic">✘</span><span><b>Só as que errei</b><small>${wrong} questão(ões)</small></span></a>
       </div>
@@ -288,11 +293,11 @@
   }
   routes.treino = arg => {
     if (arg === "erradas") return practice(shuffle(QB.filter(q => S.q[q.id] && S.q[q.id].wrong > 0)).slice(0, 10), "Só as que errei");
-    if (arg === "gerado") return practice(GEN.many(10), "Variações geradas");
+    if (arg === "gerado") return practice(gen(10), "Variações geradas");
     if (arg === "ia") return practice(pickPractice(10, null, q => q.src === "ia"), "Questões importadas");
     const d = arg && arg[0] === "d" ? arg.slice(1) : null;
     if (d) return practice(pickPractice(10, d), `Domínio ${d}`);
-    practice(shuffle([...pickPractice(8), ...GEN.many(2)]), "Treino rápido");
+    practice(shuffle(GEN ? [...pickPractice(8), ...gen(2)] : pickPractice(10)), "Treino rápido");
   };
   routes.revisao = () => practice(shuffle(due()).slice(0, 15), "Revisão espaçada");
 
@@ -502,8 +507,8 @@
     const s4 = () => {
       $app.innerHTML = `${head("Reflexão")}
         <div class="card"><h3>📖 Resumo da reflexão</h3>
-          <dl class="kv"><dt>Conceito AWS testado</dt><dd>${esc(q.concept)}</dd>
-          <dt>Domínio e task</dt><dd>${esc(dname(q.d))} · Task ${q.t}: ${esc(E.tasks[q.t])}</dd>
+          <dl class="kv"><dt>Conceito testado</dt><dd>${esc(q.concept)}</dd>
+          <dt>Domínio e task</dt><dd>${esc(dname(q.d))}${E.tasks && E.tasks[q.t] ? ` · Task ${q.t}: ${esc(E.tasks[q.t])}` : ""}${q.sc ? ` · Cenário: ${esc(q.sc)}` : ""}</dd>
           <dt>Padrão de pegadinha</dt><dd>${esc(q.trap)}</dd>
           <dt>Para levar para a prova</dt><dd>${esc(q.tip)}</dd>
           <dt>Documentação</dt><dd><a href="${esc(q.ref)}" target="_blank" rel="noopener">${esc(q.ref.replace("https://", ""))}</a></dd></dl></div>
@@ -531,9 +536,9 @@
       const list = CMP.filter(c => !f || (c.title + c.svc.map(s => s.join(" ")).join(" ")).toLowerCase().includes(f.toLowerCase()));
       document.getElementById("cl").innerHTML = list.map(c => `<a href="#/comparar/${c.id}"><span class="ic">⇄</span><span><b>${esc(c.title)}</b><small>${c.d.map(d => "D" + d).join(" · ")}</small></span></a>`).join("") || `<p class="muted">Nada encontrado.</p>`;
     };
-    $app.innerHTML = `<h1>Comparar serviços</h1>
-      <p class="muted small">Pares que mais confundem no DVA-C02: tabela, palavras-chave da prova, analogia e regra de decisão.</p>
-      <input type="search" id="f" placeholder="Buscar (ex.: SQS, Cognito, KMS)">
+    $app.innerHTML = `<h1>${esc(E.cmp && E.cmp.title || "Comparar")}</h1>
+      <p class="muted small">Pares que mais confundem no ${esc(E.code)}: tabela, palavras-chave da prova, analogia e regra de decisão.</p>
+      <input type="search" id="f" placeholder="${esc(E.cmp && E.cmp.search || "Buscar")}">
       <div class="menu" id="cl"></div>`;
     document.getElementById("f").oninput = e => draw(e.target.value);
     draw();
@@ -561,26 +566,29 @@
       .sort((a, b) => a.acc - b.acc || b.w - a.w)[0].d;
   }
   function buildPrompt(d, n) {
-    const skills = shuffle(E.skills[d]).slice(0, 6);
+    const skills = shuffle(E.skills && E.skills[d] || []).slice(0, 6);
     const known = [...new Set(QB.filter(q => q.d === +d).map(q => q.concept))];
-    const tasks = Object.entries(E.tasks).filter(([k]) => k[0] === String(d)).map(([k, v]) => `${k} ${v}`).join("; ");
-    const two = Math.max(1, Math.round(n * .2));
-    return `Você é um instrutor especialista em certificações AWS. Gere ${n} questões ORIGINAIS de prática para o exame ${E.name} (${E.code}), em português do Brasil (nomes de serviços e termos técnicos em inglês).
+    const tasks = Object.entries(E.tasks || {}).filter(([k]) => k[0] === String(d)).map(([k, v]) => `${k} ${v}`).join("; ");
+    const multi = E.prompt && E.prompt.multiShare != null ? E.prompt.multiShare : .2;
+    const two = multi ? Math.max(1, Math.round(n * multi)) : 0;
+    const P = E.prompt || {};
+    return `Você é um instrutor especialista em ${P.expert || "certificações técnicas"}. Gere ${n} questões ORIGINAIS de prática para o exame ${E.name} (${E.code}), em português do Brasil (nomes de produtos e termos técnicos em inglês).
 
-DOMÍNIO: ${d} — ${E.domains[d].en} (${E.domains[d].weight}% da prova). Tasks: ${tasks}.
-FOQUE NESTAS SKILLS DO EXAM GUIDE (distribua entre elas):
-${skills.map(s => "- " + s).join("\n")}
+DOMÍNIO: ${d} — ${E.domains[d].en} (${E.domains[d].weight}% da prova).${tasks ? ` Tasks: ${tasks}.` : ""}${E.scenarios ? `
+Ancore cada questão em um destes cenários da prova (campo "sc"): ${E.scenarios.join("; ")}.` : ""}
+${skills.length ? `FOQUE NESTES TEMAS DO DOMÍNIO (distribua entre eles):
+${skills.map(s => "- " + s).join("\n")}` : ""}
 
 NÃO repita estes conceitos, que já estão no meu banco: ${known.join("; ")}.
 
 REGRAS (iguais às do Kiro Study Buddy):
 1. Somente questões de cenário realista de cliente; nada de definição ou decoreba.
-2. Prova Associate: ${n - two} de escolha única (4 opções, 1 correta) e ${two} de múltipla resposta (5 opções, exatamente 2 corretas, com "(Selecione DUAS.)" no enunciado).
-3. Distratores plausíveis: serviços ou abordagens reais que PODERIAM funcionar, mas não são a MELHOR resposta para as restrições.
+2. ${two ? `${n - two} de escolha única (4 opções, 1 correta) e ${two} de múltipla resposta (5 opções, exatamente 2 corretas, com "(Selecione DUAS.)" no enunciado).` : `Todas de escolha única (4 opções, 1 correta).`}
+3. Distratores plausíveis: recursos ou abordagens reais que PODERIAM funcionar, mas não são a MELHOR resposta para as restrições.
 4. Use palavras-sinal da prova: "MENOR esforço", "MENOR custo", "MAIS seguro", "menor sobrecarga operacional", "sem alterar o código" etc.
 5. Misture a dificuldade: Intermediária, Desafiadora e Pegadinha (distratores muito próximos da correta).
-6. NÃO invente recursos, limites ou comportamentos. Baseie-se na documentação oficial (docs.aws.amazon.com) e confira na web se puder. Na dúvida, escolha outro tema.
-7. Sem leitura ou escrita de código. Somente serviços no escopo do ${E.code}.
+6. NÃO invente recursos, limites ou comportamentos. Baseie-se na documentação oficial (${(E.docs && E.docs.label) || "documentação oficial"}) e confira na web se puder. Na dúvida, escolha outro tema.
+7. ${P.scope || `Somente temas no escopo do ${E.code}.`}
 8. Não reproduza questões de provas reais ou de dumps.
 
 FORMATO: responda APENAS com um array JSON válido dentro de um bloco \`\`\`json, sem texto antes ou depois. Cada item:
@@ -596,10 +604,11 @@ FORMATO: responda APENAS com um array JSON válido dentro de um bloco \`\`\`json
   "obj": "o que a questão realmente pede",
   "cons": ["restrição 1", "restrição 2"],
   "el": [3],                               // índices das opções elimináveis de cara
-  "concept": "conceito AWS testado",
+  "concept": "conceito testado",${E.scenarios ? `
+  "sc": "nome do cenário (um da lista acima)",` : ""}
   "trap": "padrão de pegadinha usado",
   "tip": "regra curta para levar para a prova",
-  "ref": "https://docs.aws.amazon.com/... (página oficial real)",
+  "ref": "${(E.docs && E.docs.example) || "https://..."} (página oficial real)",
   "ev": "frase COPIADA LITERALMENTE (em inglês) da página ref que comprova a resposta correta",
   "evu": "URL exata da página de onde a frase foi copiada"
 }
@@ -621,20 +630,21 @@ OBRIGATÓRIO: só inclua uma questão se você tiver aberto a página oficial e 
         if (!Array.isArray(x.o) || x.o.length < 4 || x.o.length > 6 || x.o.some(o => typeof o !== "string")) return "opções inválidas";
         if (!Array.isArray(x.a) || !x.a.length || x.a.length >= x.o.length || x.a.some(i => !Number.isInteger(i) || i < 0 || i >= x.o.length) || new Set(x.a).size !== x.a.length) return "gabarito inválido";
         if (!Array.isArray(x.w) || x.w.length !== x.o.length) return "explicações não batem com as opções";
-        if (![1, 2, 3, 4].includes(+x.d)) return "domínio inválido";
+        if (!E.domains[+x.d]) return "domínio inválido";
         if (have.has(norm(x.q))) return "repetida";
         if (typeof x.ev !== "string" || x.ev.length < 20) return "sem citação da documentação (ev)";
-        if (!/^https:\/\/docs\.aws\.amazon\.com\//.test(x.evu || x.ref || "")) return "sem link da documentação oficial";
+        if (!isDoc(x.evu || x.ref)) return "sem link da documentação oficial";
       })();
       if (why) { bad.push(`#${k + 1}: ${why}`); return; }
       const q = {
-        id: "u-" + hash(x.q), d: +x.d, t: E.tasks[x.t] ? x.t : `${x.d}.1`, lvl: x.lvl || "IA", src: "ia",
+        id: "u-" + hash(x.q), d: +x.d, t: E.tasks && E.tasks[x.t] ? x.t : `${x.d}.1`, lvl: x.lvl || "IA", src: "ia",
+        sc: E.scenarios && E.scenarios.includes(x.sc) ? x.sc : undefined,
         q: x.q, o: x.o, a: x.a, w: x.w.map(String),
         kw: (x.kw || []).filter(k => typeof k === "string" && k && x.q.includes(k)),
         obj: x.obj || "", cons: Array.isArray(x.cons) ? x.cons.map(String) : [],
         el: (x.el || []).filter(i => Number.isInteger(i) && i >= 0 && i < x.o.length && !x.a.includes(i)),
         concept: x.concept || "", trap: x.trap || "", tip: x.tip || "",
-        ref: /^https:\/\/(docs\.)?aws\.amazon\.com\//.test(x.ref || "") ? x.ref : E.guide,
+        ref: isDoc(x.ref) ? x.ref : (isDoc(x.evu) ? x.evu : E.guide),
         ev: x.ev, evu: x.evu || x.ref
       };
       if (x.a.length > 1) q.multi = true;
@@ -700,13 +710,13 @@ OBRIGATÓRIO: só inclua uma questão se você tiver aberto a página oficial e 
         <button class="btn ghost" id="rs">Zerar progresso</button><p id="msg" class="small"></p></div>
       <div class="card"><h3>Sobre</h3>
         <p class="small">Banco: ${CORE} questões curadas + ${S.packs.length} importadas + variações geradas infinitas · ${CMP.length} comparações. Exame: ${E.name} (${E.code}).</p>
-        <p class="small">Metodologia (modos, transcript e destrinchar em 4 passos) adaptada do <a href="https://github.com/aws-samples/sample-kiro-study-buddy" target="_blank" rel="noopener">Kiro Study Buddy</a> (licença MIT). Domínios e pesos do <a href="${E.guide}" target="_blank" rel="noopener">exam guide oficial</a>.</p>
+        <p class="small">Metodologia (modos, transcript e destrinchar em 4 passos) adaptada do <a href="https://github.com/aws-samples/sample-kiro-study-buddy" target="_blank" rel="noopener">Kiro Study Buddy</a> (licença MIT). ${E.unofficialBlueprint ? `Domínios e pesos <b>não oficiais</b>, de <a href="${E.guide}" target="_blank" rel="noopener">resumos públicos do exame</a>: ${esc(E.unofficialBlueprint)}` : `Domínios e pesos do <a href="${E.guide}" target="_blank" rel="noopener">exam guide oficial</a>.`}</p>
         <p class="small muted">Material de estudo independente, não oficial e sem conteúdo de provas reais. As questões são originais e podem conter imprecisões: confira sempre na documentação oficial.</p></div>`;
     const msg = t => document.getElementById("msg").textContent = t;
     document.getElementById("ex").onclick = () => {
       const a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify(S)], { type: "application/json" }));
-      a.download = `dva-treino-${today()}.json`; a.click();
+      a.download = `${E.id}-progresso-${today()}.json`; a.click();
     };
     document.getElementById("im").onchange = e => {
       const f = e.target.files[0]; if (!f) return;
@@ -720,7 +730,10 @@ OBRIGATÓRIO: só inclua uma questão se você tiver aberto a página oficial e 
     };
   };
 
+  document.title = `${E.code} · Cert Treino`;
+  if (!CMP.length) document.querySelectorAll('.tabbar a[data-tab="comparar"]').forEach(a => a.remove());
   render();
+  const ROOT = window.ROOT || "./";
   if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost"))
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register(ROOT + "sw.js", { scope: ROOT }).catch(() => {});
 })();

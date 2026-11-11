@@ -76,7 +76,7 @@ main { max-width: 680px; margin: 0 auto; padding: 16px; outline: none; }
 
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
   background: var(--card); border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -239,3 +239,12 @@ input[type=search] {
 
 .evid { border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 10px 12px; margin: 12px 0; }
 .evid blockquote { margin: 6px 0; padding: 0 0 0 10px; border-left: 3px solid var(--ok); font-size: 14px; font-style: italic; }
+
+/* Hub de certificações */
+.certs { display: grid; gap: 12px; }
+.cert { display: block; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.cert .top { display: flex; align-items: center; gap: 10px; }
+.cert .logo { font-size: 12px; }
+.cert small { display: block; color: var(--muted); margin-top: 6px; }
+.cert .bar { margin-top: 10px; }
+.cert.soon { opacity: .55; pointer-events: none; }

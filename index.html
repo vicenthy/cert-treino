@@ -3,39 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>DVA Treino</title>
-  <meta name="description" content="Treino mobile para a certificação AWS Certified Developer - Associate (DVA-C02).">
+  <title>Cert Treino</title>
+  <meta name="description" content="Treino mobile para certificações: questões verificadas na documentação oficial, revisão espaçada e simulados.">
   <meta name="theme-color" content="#0f1720" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="DVA Treino">
+  <meta name="apple-mobile-web-app-title" content="Cert Treino">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="engine/styles.css">
 </head>
 <body>
   <header class="topbar">
-    <a href="#/" class="brand"><span class="logo">DVA</span> Treino</a>
-    <a href="#/ajustes" class="iconbtn" aria-label="Ajustes">⚙︎</a>
+    <span class="brand"><span class="logo">CERT</span> Treino</span>
   </header>
-  <main id="app" tabindex="-1"></main>
-  <nav class="tabbar" aria-label="Navegação">
-    <a href="#/" data-tab="home"><span>⌂</span>Início</a>
-    <a href="#/praticar" data-tab="praticar"><span>✎</span>Praticar</a>
-    <a href="#/simulado" data-tab="simulado"><span>⏱</span>Simulado</a>
-    <a href="#/comparar" data-tab="comparar"><span>⇄</span>Comparar</a>
-  </nav>
-  <script src="data/exam.js"></script>
-  <script src="data/q-d1.js"></script>
-  <script src="data/q-d2.js"></script>
-  <script src="data/q-d3.js"></script>
-  <script src="data/q-d4.js"></script>
-  <script src="data/q-lote2.js"></script>
-  <script src="data/q-lote3.js"></script>
-  <script src="data/compare.js"></script>
-  <script src="data/gen.js"></script>
-  <script src="app.js"></script>
+  <main id="app">
+    <h1>Qual certificação?</h1>
+    <p class="muted small">Escolha a prova. O progresso de cada uma fica salvo separado, neste aparelho.</p>
+    <div class="certs" id="list"></div>
+    <p class="foot small muted">Material de estudo independente e não oficial, sem conteúdo de provas reais. As questões são originais e trazem a citação da documentação oficial que comprova a resposta.</p>
+  </main>
+  <script src="certs.js"></script>
+  <script>
+    (() => {
+      const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const prog = c => { try { const s = JSON.parse(localStorage.getItem(c.storageKey) || "{}"); return { seen: Object.keys(s.q || {}).length, sims: (s.sims || []).length, last: (s.sims || []).slice(-1)[0] }; } catch (_) { return { seen: 0, sims: 0 }; } };
+      document.getElementById("list").innerHTML = CERTS.map(c => {
+        const p = prog(c), pc = c.total ? Math.round(p.seen / c.total * 100) : 0;
+        return `<a class="cert ${c.total ? "" : "soon"}" href="${c.path}">
+          <div class="top"><span class="logo">${esc(c.logo)}</span><b>${esc(c.code)}</b><span class="muted small">${esc(c.vendor)}</span></div>
+          <div>${esc(c.name)}</div>
+          <small>${c.total ? `${c.total} questões · ${p.seen} vistas${p.last ? ` · último simulado ${p.last.scaled}` : ""}` : "Em preparação"}</small>
+          <div class="bar"><i style="width:${pc}%"></i></div>
+          <small>${esc(c.note)}</small></a>`;
+      }).join("");
+      if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost"))
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+    })();
+  </script>
 </body>
 </html>

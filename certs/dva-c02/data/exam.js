@@ -1,5 +1,8 @@
 // Metadados oficiais do exame (fonte: exam guide DVA-C02, docs.aws.amazon.com/aws-certification)
 window.EXAM = {
+  id: "dva-c02",
+  storageKey: "dva-treino-v1",   // chave original: preserva o progresso de quem já usava o DVA Treino
+  vendor: "AWS",
   code: "DVA-C02",
   name: "AWS Certified Developer - Associate",
   guide: "https://docs.aws.amazon.com/aws-certification/latest/developer-associate-02/developer-associate-02.html",
@@ -7,6 +10,17 @@ window.EXAM = {
   scored: 50,
   minutes: 130,
   passing: 720,           // escala 100–1000
+  docs: {
+    label: "docs.aws.amazon.com",
+    example: "https://docs.aws.amazon.com/...",
+    allow: ["^https://docs\\.aws\\.amazon\\.com/"]
+  },
+  prompt: {
+    expert: "certificações AWS",
+    multiShare: .2,
+    scope: "Sem leitura ou escrita de código. Somente serviços no escopo do DVA-C02."
+  },
+  cmp: { title: "Comparar serviços", search: "Buscar (ex.: SQS, Cognito, KMS)" },
   domains: {
     1: { name: "Desenvolvimento com serviços AWS", en: "Development with AWS Services", weight: 32 },
     2: { name: "Segurança", en: "Security", weight: 26 },

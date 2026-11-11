@@ -5,7 +5,7 @@ App web gratuito para estudar para certificações pelo celular. A tela inicial 
 | Certificação | Questões | Domínios |
 |---|---|---|
 | AWS Certified Developer – Associate (DVA-C02) | 114 | exam guide oficial |
-| Claude Certified Architect – Foundations (CCA-F) | 35 | **não oficiais**: resumos públicos, sem o exam guide da Anthropic |
+| Claude Certified Architect – Foundations (CCA-F) | 84 (+ 13 comparações) | **não oficiais**: resumos públicos, sem o exam guide da Anthropic |
 
 **Precisão:** toda questão curada traz a frase da documentação oficial (`ev`/`evu`) que comprova a resposta, e o app mostra essa citação na explicação. As citações são conferidas literalmente contra as páginas oficiais antes de entrar no banco. Questões importadas de IA aparecem marcadas como "não verificada".
 

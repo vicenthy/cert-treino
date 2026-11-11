@@ -10,7 +10,7 @@ window.CERTS = [
   {
     id: "cca-f", path: "certs/cca-f/", logo: "CCA", vendor: "Anthropic",
     code: "CCA-F", name: "Claude Certified Architect – Foundations",
-    storageKey: "cert-treino-cca-f-v1", total: 35,
+    storageKey: "cert-treino-cca-f-v1", total: 84,
     note: "Domínios não oficiais (resumos públicos) · questões verificadas na documentação da Anthropic"
   }
 ];

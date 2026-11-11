@@ -38,14 +38,15 @@ window.EXAM = {
     5: ["Prompt caching (prefix order, breakpoints, TTL)", "Context windows and token budgets", "Compaction", "Context editing (tool result clearing)", "Rate limits and retries", "Error codes (429, 529, 5xx)", "Message Batches API", "Graceful degradation and fallbacks", "Long-running agent reliability"]
   },
   docs: {
-    label: "platform.claude.com/docs, code.claude.com/docs, modelcontextprotocol.io e anthropic.com/engineering",
+    label: "platform.claude.com/docs, code.claude.com/docs, modelcontextprotocol.io, anthropic.com e claude.com/resources",
     example: "https://platform.claude.com/docs/en/...",
     allow: [
       "^https://platform\\.claude\\.com/docs/",
       "^https://code\\.claude\\.com/docs/",
       "^https://docs\\.claude\\.com/",
       "^https://modelcontextprotocol\\.io/",
-      "^https://www\\.anthropic\\.com/(engineering|research)/"
+      "^https://www\\.anthropic\\.com/(engineering|research)/",
+      "^https://claude\\.com/(blog|resources)/"
     ]
   },
   prompt: {
